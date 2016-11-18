@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <File name="file" fileName="logs/test.log" append="false">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
+        </File>
+
+        <!--msg:
+            need create sys_log table before use JDBC:
+             CREATE TABLE sys_log (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `level` varchar(32) NOT NULL,
+              `logger` varchar(100) NOT NULL,
+              `message` varchar(1000) DEFAULT NULL,
+              `exception` varchar(10000) DEFAULT NULL,
+              `date_add` datetime NOT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+        -->
+
+        <!--<JDBC name="Database" tableName="sys_log">-->
+            <!--<ConnectionFactory class="ConnectionFactory" method="getDatabaseConnection" />-->
+            <!--<Column name="date_add" isEventTimestamp="true" />-->
+            <!--<Column name="level" pattern="%level" />-->
+            <!--<Column name="logger" pattern="%logger" />-->
+            <!--<Column name="message" pattern="%message" />-->
+            <!--<Column name="exception" pattern="%ex{full}" />-->
+        <!--</JDBC>-->
+
+        <!--msg:
+        config the logstash configure file befor use Socket
+        start logstash: logstash -f tcp.conf
+
+        tcp.conf:
+        input {
+          tcp {
+            host => "0.0.0.0"
+            port => "4560"
+            mode => "server"
+            type => "microwiki"
+            add_field => {
+              "name" => "Routh"
+            }
+          }
+        }
+        filter {
+          #Only matched data are send to output.
+        }
+        output {
+          stdout {
+            codec => rubydebug
+          }
+          elasticsearch {
+            hosts => ["127.0.0.1:9200"]
+            action => "index"
+            codec => rubydebug
+            index => "microwiki-%{+YYYY.MM.dd}"
+            template_name => "microwiki"
+          }
+        }
+        -->
+
+        <!--<Socket name="ELK" host="localhost" port="4560" protocol="TCP">-->
+            <!--&lt;!&ndash; 输出格式  序列布局&ndash;&gt;-->
+            <!--<SerializedLayout/>-->
+            <!--<PatternLayout pattern="${PATTERN}" />-->
+        <!--</Socket>-->
+
+        <!--msg:
+        log4j redis NoSqlAppender: com.tiger.log4j2.Appender
+        start logstash: logstash -f redis.conf
+
+        redis.conf:
+        input {
+          redis {
+            host => "127.0.0.1"
+            port => "6379"
+            key => "web_core_log"
+            data_type => "list"
+            codec  => "json"
+            type => "web_core_log"
+            tags => ["web_core_log"]
+          }
+        }
+
+        filter {
+          #Only matched data are send to output.
+        }
+
+        output {
+          stdout {
+            codec => rubydebug
+          }
+          elasticsearch {
+            hosts => ["127.0.0.1:9200"]
+            action => "index"
+            codec => rubydebug
+            index => "web_core-%{+YYYY.MM.dd}"
+            template_name => "web_core"
+          }
+        }
+
+        -->
+
+        <!--<NoSql name="Redis">-->
+            <!--<Redis host="localhost" />-->
+        <!--</NoSql>-->
+
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="com.tiger.JavaApiSample" level="debug">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="org.apache.zookeeper" level="warn">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="debug">
+            <AppenderRef ref="Console"/>
+            <!--<AppenderRef ref="Redis"/>-->
+            <!--<AppenderRef ref="ELK"/>-->
+            <!--<AppenderRef ref="file"/>-->
+            <!--<AppenderRef ref="Database" />-->
+        </Root>
+    </Loggers>
+</Configuration>
