@@ -6,6 +6,7 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +52,11 @@ public class PropertiesSycnTest {
     }
 
     @Test
-    public void changeProperties(){
+    public void changeProperties() throws IOException {
+
+        /*change data by using shell*/
+        System.in.read();
+
         log.warn("changeProperties");
         print();
         propertiesSycnList.get(0).setProperties("4");

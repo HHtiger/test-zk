@@ -2,11 +2,15 @@ package com.tiger;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Package: com.tiger
@@ -56,7 +60,33 @@ public class PropertiesSycn {
                 client.create().creatingParentsIfNeeded().forPath(path,new byte[]{0});
             }
 
-            client.getData().usingWatcher((Watcher) event -> System.out.println(index + " get notice:" + event)).forPath(path);
+            ExecutorService pool = Executors.newCachedThreadPool();
+            //设置节点的cache
+            TreeCache treeCache = new TreeCache(client, path);
+            //设置监听器和处理过程
+            treeCache.getListenable().addListener((client1, event) -> {
+                ChildData data = event.getData();
+                if(data !=null){
+                    switch (event.getType()) {
+                        case NODE_ADDED:
+                            System.out.println("NODE_ADDED : "+ data.getPath() +"  data:"+ new String(data.getData()));
+                            break;
+                        case NODE_REMOVED:
+                            System.out.println("NODE_REMOVED : "+ data.getPath() +"  data:"+ new String(data.getData()));
+                            break;
+                        case NODE_UPDATED:
+                            System.out.println("NODE_UPDATED : "+ data.getPath() +"  data:"+ new String(data.getData()));
+                            break;
+
+                        default:
+                            break;
+                    }
+                }else{
+                    System.out.println( "data is null : "+ event.getType());
+                }
+            });
+
+            treeCache.start();
 
         } catch (Exception e) {
             e.printStackTrace();
