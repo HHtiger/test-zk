@@ -9,9 +9,6 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * Package: com.tiger
  * ClassName: PropertiesSycn
@@ -60,10 +57,7 @@ public class PropertiesSycn {
                 client.create().creatingParentsIfNeeded().forPath(path,new byte[]{0});
             }
 
-            ExecutorService pool = Executors.newCachedThreadPool();
-            //设置节点的cache
             TreeCache treeCache = new TreeCache(client, path);
-            //设置监听器和处理过程
             treeCache.getListenable().addListener((client1, event) -> {
                 ChildData data = event.getData();
                 if(data !=null){
